@@ -10,7 +10,8 @@ typedef struct WTTP_P_OPT_CONCAT(Option_, TYPE)
 	TYPE value;
 } WTTP_P_OPT_CONCAT(Option_, TYPE);
 
-[[maybe_unused]] WTTP_P_OPT_CONCAT(Option_, TYPE) WTTP_P_OPT_CONCAT3(option_, TYPE, _some)
+// option_some
+[[maybe_unused]] static WTTP_P_OPT_CONCAT(Option_, TYPE) WTTP_P_OPT_CONCAT3(option_, TYPE, _some)
 	(TYPE value)
 {
 	return (WTTP_P_OPT_CONCAT(Option_, TYPE)) {
@@ -19,7 +20,8 @@ typedef struct WTTP_P_OPT_CONCAT(Option_, TYPE)
 	};
 }
 
-[[maybe_unused]] TYPE WTTP_P_OPT_CONCAT3(option_, TYPE, _unwrap)
+// option_unwrap
+[[maybe_unused]] static TYPE WTTP_P_OPT_CONCAT3(option_, TYPE, _unwrap)
 	(WTTP_P_OPT_CONCAT(Option_, TYPE) self)
 {
 	if (self.has_value)
@@ -28,7 +30,7 @@ typedef struct WTTP_P_OPT_CONCAT(Option_, TYPE)
 		PANIC("called option_" WTTP_P_OPT_STRINGIFY(TYPE) "_unwrap on none");
 }
 
-const WTTP_P_OPT_CONCAT(Option_, TYPE) WTTP_P_OPT_CONCAT3(option_, TYPE, _none)
+[[maybe_unused]] static const WTTP_P_OPT_CONCAT(Option_, TYPE) WTTP_P_OPT_CONCAT3(option_, TYPE, _none)
 = (WTTP_P_OPT_CONCAT(Option_, TYPE)) {
 	.has_value = false,
 };

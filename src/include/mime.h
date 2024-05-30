@@ -1,4 +1,4 @@
-// File extension to MIME associations
+// File extension to MIME type associations
 
 #if !defined (INCL_MIME_H)
 #define INCL_MIME_H

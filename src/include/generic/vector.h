@@ -11,6 +11,7 @@ typedef struct WTTP_P_VEC_CONCAT(Vector_, TYPE) {
 	TYPE* NULLABLE data;
 } WTTP_P_VEC_CONCAT(Vector_, TYPE);
 
+// vector_new
 [[maybe_unused]] static WTTP_P_VEC_CONCAT(Vector_, TYPE) WTTP_P_VEC_CONCAT3(vector_, TYPE, _new)
 	(size_t initial_capacity)
 {
@@ -31,6 +32,7 @@ typedef struct WTTP_P_VEC_CONCAT(Vector_, TYPE) {
 	};
 }
 
+// vector_set_capacity
 [[maybe_unused]] static void WTTP_P_VEC_CONCAT3(vector_, TYPE, _set_capacity)
 	(WTTP_P_VEC_CONCAT(Vector_, TYPE)* NONNULL self, size_t new_capacity)
 {
@@ -55,6 +57,7 @@ typedef struct WTTP_P_VEC_CONCAT(Vector_, TYPE) {
 		self->length = self->capacity;
 }
 
+// vector_set_length
 [[maybe_unused]] static void WTTP_P_VEC_CONCAT3(vector_, TYPE, _set_length)
 	(WTTP_P_VEC_CONCAT(Vector_, TYPE)* NONNULL self, size_t new_length)
 {
@@ -75,6 +78,7 @@ typedef struct WTTP_P_VEC_CONCAT(Vector_, TYPE) {
 	self->length = new_length;
 }
 
+// vector_extend
 [[maybe_unused]] static void WTTP_P_VEC_CONCAT3(vector_, TYPE, _extend)
 	(WTTP_P_VEC_CONCAT(Vector_, TYPE)* NONNULL self, const TYPE* NONNULL elements, size_t count)
 {
@@ -91,12 +95,14 @@ typedef struct WTTP_P_VEC_CONCAT(Vector_, TYPE) {
 	memcpy(self->data + current_length, elements, count * sizeof(TYPE));
 }
 
+// vector_add
 [[maybe_unused]] static void WTTP_P_VEC_CONCAT3(vector_, TYPE, _add)
 	(WTTP_P_VEC_CONCAT(Vector_, TYPE)* NONNULL self, TYPE value)
 {
 	WTTP_P_VEC_CONCAT3(vector_, TYPE, _extend) (self, &value, 1);
 }
 
+// vector_free
 [[maybe_unused]] static void WTTP_P_VEC_CONCAT3(vector_, TYPE, _free)
 	(WTTP_P_VEC_CONCAT(Vector_, TYPE)* NONNULL self)
 {

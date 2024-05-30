@@ -9,13 +9,13 @@ typedef struct RngState
 	uint64_t high;
 } RngState;
 
-thread_local RngState state;
-thread_local bool initialized = false;
+static thread_local RngState state;
+static thread_local bool initialized = false;
 
 void random_init_thread()
 {
 	uint64_t entropy[2];
-	getrandom(&entropy, sizeof(entropy), 0);
+	assert(getrandom(&entropy, sizeof(entropy), 0) == sizeof(entropy));
 
 	state.low = entropy[0];
 	state.high = entropy[1];

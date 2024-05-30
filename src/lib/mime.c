@@ -62,6 +62,6 @@ Option_Str mime(Str file_extension)
 	Str* result = hashmap_Str_Str_get(&associations, &file_extension);
 
 	return result != nullptr
-		? *result
+		? option_Str_some(*result)
 		: option_Str_none;
 }

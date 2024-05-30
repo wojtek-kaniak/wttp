@@ -16,7 +16,7 @@ typedef struct WTTP_P_RES_CONCAT4(Result_, TYPE_OK, _, TYPE_ERR)
 } WTTP_P_RES_CONCAT4(Result_, TYPE_OK, _, TYPE_ERR);
 
 // Result_ok
-WTTP_P_RES_CONCAT4(Result_, TYPE_OK, _, TYPE_ERR) WTTP_P_RES_CONCAT5(result_, TYPE_OK, _, TYPE_ERR, _ok)
+[[maybe_unused]] static WTTP_P_RES_CONCAT4(Result_, TYPE_OK, _, TYPE_ERR) WTTP_P_RES_CONCAT5(result_, TYPE_OK, _, TYPE_ERR, _ok)
 	(TYPE_OK value)
 {
 	return (WTTP_P_RES_CONCAT4(Result_, TYPE_OK, _, TYPE_ERR)) {
@@ -26,7 +26,7 @@ WTTP_P_RES_CONCAT4(Result_, TYPE_OK, _, TYPE_ERR) WTTP_P_RES_CONCAT5(result_, TY
 }
 
 // Result_err
-WTTP_P_RES_CONCAT4(Result_, TYPE_OK, _, TYPE_ERR) WTTP_P_RES_CONCAT5(result_, TYPE_OK, _, TYPE_ERR, _err)
+[[maybe_unused]] static WTTP_P_RES_CONCAT4(Result_, TYPE_OK, _, TYPE_ERR) WTTP_P_RES_CONCAT5(result_, TYPE_OK, _, TYPE_ERR, _err)
 	(TYPE_ERR error)
 {
 	return (WTTP_P_RES_CONCAT4(Result_, TYPE_OK, _, TYPE_ERR)) {
@@ -36,7 +36,7 @@ WTTP_P_RES_CONCAT4(Result_, TYPE_OK, _, TYPE_ERR) WTTP_P_RES_CONCAT5(result_, TY
 }
 
 // Result_unwrap
-TYPE_OK WTTP_P_RES_CONCAT5(result_, TYPE_OK, _, TYPE_ERR, _unwrap)
+[[maybe_unused]] static TYPE_OK WTTP_P_RES_CONCAT5(result_, TYPE_OK, _, TYPE_ERR, _unwrap)
 	(WTTP_P_RES_CONCAT4(Result_, TYPE_OK, _, TYPE_ERR) self)
 {
 	if (self.is_ok)
@@ -46,7 +46,7 @@ TYPE_OK WTTP_P_RES_CONCAT5(result_, TYPE_OK, _, TYPE_ERR, _unwrap)
 }
 
 // Result_unwrap_err
-TYPE_ERR WTTP_P_RES_CONCAT5(result_, TYPE_OK, _, TYPE_ERR, _unwrap_err)
+[[maybe_unused]] static TYPE_ERR WTTP_P_RES_CONCAT5(result_, TYPE_OK, _, TYPE_ERR, _unwrap_err)
 	(WTTP_P_RES_CONCAT4(Result_, TYPE_OK, _, TYPE_ERR) self)
 {
 	if (!self.is_ok)

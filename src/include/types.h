@@ -30,7 +30,7 @@ typedef struct Str
 	const char* NULLABLE data;
 } Str;
 
-const Str STR_CRLF = (Str){
+[[maybe_unused]] static const Str STR_CRLF = (Str){
 	.length = 2,
 	.data = "\r\n",
 };
@@ -42,7 +42,7 @@ const Str STR_CRLF = (Str){
 
 /// Convert a C string to a `Str`
 /// SAFETY: `cstr` has to be valid for the entire lifetime of the returned `Str`
-Str str_from_cstr(const char* NONNULL cstr)
+[[maybe_unused]] static Str str_from_cstr(const char* NONNULL cstr)
 {
 	size_t length = strlen(cstr);
 	return (Str){
@@ -54,7 +54,7 @@ Str str_from_cstr(const char* NONNULL cstr)
 /// Convert a `StrBuffer` to a `Str`
 /// SAFETY: the buffer may not be modified for the lifetime of the returned `Str`
 /// 	(including appending, as the underlying memory may be reallocated and freed)
-Str str_from_strbuffer(StrBuffer buffer)
+[[maybe_unused]] static Str str_from_strbuffer(StrBuffer buffer)
 {
 	return (Str){
 		.length = buffer.length,
@@ -63,7 +63,7 @@ Str str_from_strbuffer(StrBuffer buffer)
 }
 
 /// Check for bitwise equality
-bool str_eq(Str a, Str b)
+[[maybe_unused]] static bool str_eq(Str a, Str b)
 {
 	if (a.length != b.length)
 		return false;
@@ -79,7 +79,7 @@ bool str_eq(Str a, Str b)
 }
 
 /// Case insensitive equality check, ASCII only
-bool str_eq_ci(Str a, Str b)
+[[maybe_unused]] static bool str_eq_ci(Str a, Str b)
 {
 	// TODO: utf8?
 	if (a.length != b.length)
@@ -105,7 +105,7 @@ bool str_eq_ci(Str a, Str b)
 }
 
 /// Write the `Str` to a stream
-size_t str_fwrite(Str self, FILE* NONNULL stream)
+[[maybe_unused]] static size_t str_fwrite(Str self, FILE* NONNULL stream)
 {
 	if (self.data != nullptr)
 		return fwrite(self.data, 1, self.length, stream);
@@ -143,7 +143,7 @@ Option_size_t str_find(Str self, Str substr)
 
 /// Slice `self`
 /// Panics if start or end is invalid
-Str str_slice(Str self, size_t start, size_t end)
+[[maybe_unused]] static Str str_slice(Str self, size_t start, size_t end)
 {
 	if (start > end)
 		PANIC("invalid range: start > end");
@@ -164,7 +164,7 @@ Str str_slice(Str self, size_t start, size_t end)
 
 /// Calculate a hash of `self`
 /// str_eq(a, b) implies str_hash(a) == str_hash(b)
-int64_t str_hash(Str self)
+[[maybe_unused]] static int64_t str_hash(Str self)
 {
 	// algorithm from http://www.cse.yorku.ca/~oz/hash.html
 	
@@ -178,7 +178,7 @@ int64_t str_hash(Str self)
 
 /// Calculate a case insensitive hash of `self`
 /// str_eq_ci(a, b) implies str_hash_ci(a) == str_hash_ci(b)
-int64_t str_hash_ci(Str self)
+[[maybe_unused]] static int64_t str_hash_ci(Str self)
 {
 	// algorithm from http://www.cse.yorku.ca/~oz/hash.html
 	
@@ -203,7 +203,7 @@ int64_t str_hash_ci(Str self)
 /// 	`length <= capacity`
 /// 	`data` must be allocated with the system allocator (`malloc` / `calloc`)
 /// 	and may not be freed outside of the `StrBuffer`
-StrBuffer strbuffer_from_raw(char* NULLABLE data, size_t capacity, size_t length)
+[[maybe_unused]] static StrBuffer strbuffer_from_raw(char* NULLABLE data, size_t capacity, size_t length)
 {
 	DEBUG_ASSERT((capacity == 0) == (data == nullptr));
 	DEBUG_ASSERT(capacity >= length);
@@ -216,7 +216,7 @@ StrBuffer strbuffer_from_raw(char* NULLABLE data, size_t capacity, size_t length
 }
 
 /// Clones a Str to a new StrBuffer
-StrBuffer strbuffer_from_str(Str str)
+[[maybe_unused]] static StrBuffer strbuffer_from_str(Str str)
 {
 	StrBuffer buffer = vector_char_new(str.length);
 
@@ -226,13 +226,13 @@ StrBuffer strbuffer_from_str(Str str)
 }
 
 /// Append a `Str` at the end of `buffer`
-void strbuffer_extend(StrBuffer* NONNULL buffer, Str str)
+[[maybe_unused]] static void strbuffer_extend(StrBuffer* NONNULL buffer, Str str)
 {
 	vector_char_extend(buffer, str.data, str.length);
 }
 
 /// Write a decimal representation of a `size_t` to the end of `buffer`
-void strbuffer_write_size_t(StrBuffer* NONNULL buffer, size_t value)
+[[maybe_unused]] static void strbuffer_write_size_t(StrBuffer* NONNULL buffer, size_t value)
 {
 	char num_buf[32];
 	snprintf(num_buf, 32, "%zu", value);
@@ -241,7 +241,7 @@ void strbuffer_write_size_t(StrBuffer* NONNULL buffer, size_t value)
 }
 
 /// Write a decimal representation of a `uint16_t` to the end of `buffer`
-void strbuffer_write_uint16_t(StrBuffer* NONNULL buffer, uint16_t value)
+[[maybe_unused]] static void strbuffer_write_uint16_t(StrBuffer* NONNULL buffer, uint16_t value)
 {
 	char num_buf[32];
 	snprintf(num_buf, 32, "%" PRIu16, value);
@@ -256,12 +256,12 @@ typedef Str StrCI;
 #include "generic/option.h"
 #undef TYPE
 
-bool wttp_p_str_eq_hashmap(const Str* NONNULL a, const Str* NONNULL b)
+[[maybe_unused]] static bool wttp_p_str_eq_hashmap(const Str* NONNULL a, const Str* NONNULL b)
 {
 	return str_eq(*a, *b);
 }
 
-int64_t wttp_p_str_hash_hashmap(const Str* NONNULL self)
+[[maybe_unused]] static int64_t wttp_p_str_hash_hashmap(const Str* NONNULL self)
 {
 	return str_hash(*self);
 }
@@ -277,12 +277,12 @@ int64_t wttp_p_str_hash_hashmap(const Str* NONNULL self)
 #undef TYPE_KEY
 #undef TYPE_VALUE
 
-bool wttp_p_str_eq_ci_hashmap(const Str* NONNULL a, const Str* NONNULL b)
+[[maybe_unused]] static bool wttp_p_str_eq_ci_hashmap(const Str* NONNULL a, const Str* NONNULL b)
 {
 	return str_eq_ci(*a, *b);
 }
 
-int64_t wttp_p_str_hash_ci_hashmap(const Str* NONNULL self)
+[[maybe_unused]] static int64_t wttp_p_str_hash_ci_hashmap(const Str* NONNULL self)
 {
 	return str_hash_ci(*self);
 }
@@ -304,7 +304,7 @@ int64_t wttp_p_str_hash_ci_hashmap(const Str* NONNULL self)
 #undef TYPE
 
 /// Free a header collection (freeing all values and the hashmap itself)
-void free_headers(Hashmap_StrCI_StrBuffer* NONNULL headers)
+[[maybe_unused]] static void free_headers(Hashmap_StrCI_StrBuffer* NONNULL headers)
 {
 	for (size_t i = 0; i < COUNTOF(headers->buckets); i++)
 	{

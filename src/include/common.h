@@ -44,7 +44,7 @@
 #endif
 
 /// Display an allocation failure message and abort
-[[noreturn]] void alloc_fail(const char* NONNULL file, size_t line)
+[[noreturn]] [[maybe_unused]] static void alloc_fail(const char* NONNULL file, size_t line)
 {
 	fprintf(stderr, "allocation failed\n");
 
@@ -65,7 +65,7 @@
 #define ALLOC_FAIL() alloc_fail(__FILE__, __LINE__)
 
 /// Display a panic message and abort
-[[noreturn]] void panic(const char* NONNULL message, const char* NONNULL file, size_t line)
+[[noreturn]] [[maybe_unused]] static void panic(const char* NONNULL message, const char* NONNULL file, size_t line)
 {
 	fprintf(stderr, "panicked '%s'\n\tat %s:%zu\n", message, file, line);
 
@@ -92,10 +92,10 @@ typedef enum LogLevel
 } LogLevel;
 
 /// Log a message
-void log_msg(LogLevel level, const char* message);
+void log_msg(LogLevel level, const char* NONNULL message);
 
 /// Log a message with an associated OS error number
-void log_with_errno(LogLevel level, const char* message, int err_no);
+void log_with_errno(LogLevel level, const char* NONNULL message, int err_no);
 
 #define PANIC(message) panic(message, __FILE__, __LINE__)
 

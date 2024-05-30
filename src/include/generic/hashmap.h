@@ -28,7 +28,7 @@ typedef struct WTTP_P_MAP_CONCAT4(Hashmap_, TYPE_KEY, _, TYPE_VALUE)
 } WTTP_P_MAP_CONCAT4(Hashmap_, TYPE_KEY, _, TYPE_VALUE);
 
 // Hashmap_new
-WTTP_P_MAP_CONCAT4(Hashmap_, TYPE_KEY, _, TYPE_VALUE) WTTP_P_MAP_CONCAT5(hashmap_, TYPE_KEY, _, TYPE_VALUE, _new)
+[[maybe_unused]] static WTTP_P_MAP_CONCAT4(Hashmap_, TYPE_KEY, _, TYPE_VALUE) WTTP_P_MAP_CONCAT5(hashmap_, TYPE_KEY, _, TYPE_VALUE, _new)
 	(uint64_t random_seed)
 {
 	return (WTTP_P_MAP_CONCAT4(Hashmap_, TYPE_KEY, _, TYPE_VALUE)) {
@@ -39,7 +39,7 @@ WTTP_P_MAP_CONCAT4(Hashmap_, TYPE_KEY, _, TYPE_VALUE) WTTP_P_MAP_CONCAT5(hashmap
 }
 
 // Hashmap_insert
-WTTP_P_MAP_CONCAT(Option_, TYPE_VALUE) WTTP_P_MAP_CONCAT5(hashmap_, TYPE_KEY, _, TYPE_VALUE, _insert)
+[[maybe_unused]] static WTTP_P_MAP_CONCAT(Option_, TYPE_VALUE) WTTP_P_MAP_CONCAT5(hashmap_, TYPE_KEY, _, TYPE_VALUE, _insert)
 	(WTTP_P_MAP_CONCAT4(Hashmap_, TYPE_KEY, _, TYPE_VALUE)* self, TYPE_KEY key, TYPE_VALUE value)
 {
 	uint64_t hash = WTTP_P_MAP_CONCAT(TYPE_KEY, _HASH) (&key) ^ self->random_seed;
@@ -72,7 +72,7 @@ WTTP_P_MAP_CONCAT(Option_, TYPE_VALUE) WTTP_P_MAP_CONCAT5(hashmap_, TYPE_KEY, _,
 
 // Hashmap_get
 // The returned reference is valid as long as the hashmap is not modified
-TYPE_VALUE* WTTP_P_MAP_CONCAT5(hashmap_, TYPE_KEY, _, TYPE_VALUE, _get)
+[[maybe_unused]] static TYPE_VALUE* WTTP_P_MAP_CONCAT5(hashmap_, TYPE_KEY, _, TYPE_VALUE, _get)
 	(const WTTP_P_MAP_CONCAT4(Hashmap_, TYPE_KEY, _, TYPE_VALUE)* self, TYPE_KEY* key)
 {
 	uint64_t hash = WTTP_P_MAP_CONCAT(TYPE_KEY, _HASH) (key) ^ self->random_seed;
@@ -91,12 +91,13 @@ TYPE_VALUE* WTTP_P_MAP_CONCAT5(hashmap_, TYPE_KEY, _, TYPE_VALUE, _get)
 }
 
 // Hashmap_free
-void WTTP_P_MAP_CONCAT5(hashmap_, TYPE_KEY, _, TYPE_VALUE, _free)
+[[maybe_unused]] static void WTTP_P_MAP_CONCAT5(hashmap_, TYPE_KEY, _, TYPE_VALUE, _free)
 	(WTTP_P_MAP_CONCAT4(Hashmap_, TYPE_KEY, _, TYPE_VALUE)* self)
 {
 	for (size_t i = 0; i < WTTP_P_HASHMAP_BUCKET_COUNT; i++)
 		WTTP_P_MAP_CONCAT5(vector_KeyValuePair_, TYPE_KEY, _, TYPE_VALUE, _free)(&self->buckets[i]);
 }
+
 #undef WTTP_P_MAP_CONCAT
 #undef WTTP_P_MAP_CONCAT3
 #undef WTTP_P_MAP_CONCAT4

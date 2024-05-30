@@ -1,17 +1,12 @@
 #! /bin/sh
-# TODO: build system
-src_include_path=$(realpath ./src/include)
 
-cat << EOF > .clangd
-CompileFlags:
-	Add:
-		- "-std=c23"
-		- "-I$src_include_path"
-		- "-Wall"
-		- "-Wextra"
-		- "-xc"
-		- "-DDEBUG=1"
-		- "-DWTTP_P_LIB_IMPL"
-		- "-D_XOPEN_SOURCE=500"
-		- "-DPOSIX_C_SOURCE=200112L"
-EOF
+if ! grep 'project(WTTP)' CMakeLists.txt >/dev/null ; then
+	printf 'setup.sh should be called in the project root directory'
+	exit 2
+fi
+
+LINKER_FLAGS="-fuse-ld=lld"
+
+cmake -S . -B build \
+	-DCMAKE_SHARED_LINKER_FLAGS=${LINKER_FLAGS} \
+	-DCMAKE_EXE_LINKER_FLAGS=${LINKER_FLAGS}

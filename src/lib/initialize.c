@@ -2,7 +2,7 @@
 #include "mime.h"
 #include "random.h"
 
-bool initialized;
+static bool initialized;
 void initialize_global()
 {
 	assert(!initialized);
@@ -10,7 +10,7 @@ void initialize_global()
 	mime_initialize();
 }
 
-thread_local bool thread_initialized;
+static thread_local bool thread_initialized;
 void initialize_thread()
 {
 	assert(!thread_initialized);
