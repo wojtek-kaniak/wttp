@@ -45,24 +45,27 @@ static StrBuffer format_response(Response response)
 	else
 		// default status code message
 		STRBUF_EXT_C("Internal Server Error");
+	STRBUF_EXT_C(CRLF);
 	
-	STRBUF_EXT_C(CRLF "Content-Type: ");
+	STRBUF_EXT_C("Content-Type: ");
 	strbuffer_extend(&text, response.content_type);
+	STRBUF_EXT_C(CRLF);
 
 	// Content-Length can be overridden (HEAD requests)
 	Str content_len_key = str_from_cstr("Content-Length");	
 	StrBuffer* content_length = response.additional_headers.has_value
 		? hashmap_StrCI_StrBuffer_get(&response.additional_headers.value, &content_len_key)
 		: nullptr;
-	STRBUF_EXT_C(CRLF "Content-Length: ");
+	STRBUF_EXT_C("Content-Length: ");
 	if (content_length == nullptr)
 		strbuffer_write_size_t(&text, response.content.length);
 	else
 		strbuffer_extend(&text, str_from_strbuffer(*content_length));
+	STRBUF_EXT_C(CRLF);
 
 	// TODO: handle keep-alive in listeners
-	STRBUF_EXT_C(CRLF "Connection: close" CRLF);
-	STRBUF_EXT_C(CRLF "Server: " SERVER_NAME CRLF);
+	STRBUF_EXT_C("Connection: close" CRLF);
+	STRBUF_EXT_C("Server: " SERVER_NAME CRLF);
 
 	// Additional headers:
 	if (response.additional_headers.has_value)

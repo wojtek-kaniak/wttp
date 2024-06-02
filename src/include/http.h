@@ -26,7 +26,7 @@ typedef enum HttpMethod
 #include "generic/option.h"
 #undef TYPE
 
-Option_Str http_method_to_str(HttpMethod method)
+[[maybe_unused]] static Option_Str http_method_to_str(HttpMethod method)
 {
 	switch (method)
 	{
@@ -41,7 +41,7 @@ Option_Str http_method_to_str(HttpMethod method)
 	}
 }
 
-Option_HttpMethod http_method_from_str(Str str)
+[[maybe_unused]] static Option_HttpMethod http_method_from_str(Str str)
 {
 #define WTTP_P_X(ident) \
 	if (str_eq(str_from_cstr(#ident), str)) \
@@ -52,11 +52,21 @@ Option_HttpMethod http_method_from_str(Str str)
 	return option_HttpMethod_none;
 }
 
+typedef struct HttpVersion
+{
+	unsigned int major;
+	unsigned int minor;
+} HttpVersion;
+
+#define TYPE HttpVersion
+#include "generic/option.h"
+#undef TYPE
+
 /// Parsed HTTP request, without the content
 typedef struct HttpRequest
 {
 	HttpMethod method;
-	Str version;
+	HttpVersion version;
 	StrBuffer uri;
 	Hashmap_StrCI_StrBuffer headers;
 	size_t head_length;
@@ -89,7 +99,7 @@ typedef enum HttpStatusCode : uint16_t
 } HttpStatusCode;
 
 /// Returns the default phrase for the status code
-Option_Str http_status_code_to_str(HttpStatusCode status_code)
+[[maybe_unused]] static Option_Str http_status_code_to_str(HttpStatusCode status_code)
 {
 	switch (status_code)
 	{

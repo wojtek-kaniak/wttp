@@ -1,3 +1,7 @@
+#include <stdlib.h>
+#include <ctype.h>
+#include <limits.h>
+
 #include <types.h>
 #include <http.h>
 #include "common.h"
@@ -36,6 +40,9 @@ static bool skip_whitespace(Str* text)
 		if (!is_whitespace(text->data[i]))
 			break;
 	}
+
+	*text = str_slice(*text, i, text->length);
+
 	return i > 0;
 }
 
@@ -135,6 +142,40 @@ static Option_Str next_until_whitespace(Str* text)
 	return option_Str_some(result);
 }
 
+static Option_HttpVersion next_http_version(Str* text)
+{
+	// at least "HTTP" "/" DIGIT "." DIGIT
+	if (text->length < 8)
+		return option_HttpVersion_none;
+
+	if (!str_eq(str_slice(*text, 0, 5), str_from_cstr("HTTP/")))
+		return option_HttpVersion_none;
+
+	*text = str_slice(*text, 5, text->length);
+
+	// Verify the first char is a digit since strtoul accepts leading whitespace and sign
+	if (!isdigit(text->data[0]))
+		return option_HttpVersion_none;
+	
+	char* major_end;
+	unsigned long major = strtoul(text->data, &major_end, 10);
+	*text = str_slice(*text, major_end - text->data, text->length);
+
+	if (text->data[0] != '.')
+		return option_HttpVersion_none;
+
+	*text = str_slice(*text, 1, text->length);
+	
+	char* minor_end;
+	unsigned long minor = strtoul(text->data, &minor_end, 10);
+	*text = str_slice(*text, minor_end - text->data, text->length);
+
+	return option_HttpVersion_some((HttpVersion) {
+		.major = major < UINT_MAX ? major : UINT_MAX,
+		.minor = minor < UINT_MAX ? minor : UINT_MAX,
+	});
+}
+
 static bool skip_newline(Str* text)
 {
 	// Accept LF and ignore the leading CR, see RFC 2616 19.3 Tolerant Applications
@@ -173,9 +214,10 @@ Result_HttpRequest_HttpRequestParseError parse_request_head(Str request)
 		return ERR(MALFORMED);
 
 	// HTTP version:
-	Option_Str http_version = next_token(&text);
+	// TODO: not a token
+	Option_HttpVersion http_version_opt = next_http_version(&text);
 
-	if (!http_version.has_value)
+	if (!http_version_opt.has_value)
 		return ERR(MALFORMED);
 
 	skip_whitespace(&text);
@@ -188,10 +230,10 @@ Result_HttpRequest_HttpRequestParseError parse_request_head(Str request)
 		return ERR(UNKNOWN_METHOD);
 	result.method = parsed_method.value;
 
-	if (str_eq(http_version.value, str_from_cstr("HTTP/1.1")) ||
-		str_eq(http_version.value, str_from_cstr("HTTP/1.0")))
+	HttpVersion http_version = http_version_opt.value;
+	if (http_version.major != 1 || (http_version.minor != 0 && http_version.minor != 1))
 		return ERR(UNKNOWN_VERSION);
-	result.version = http_version.value;
+	result.version = http_version;
 
 	Option_StrBuffer decoded_uri = uri_decode_absolute_path(uri.value);
 	if (!decoded_uri.has_value)
@@ -224,12 +266,12 @@ Result_HttpRequest_HttpRequestParseError parse_request_head(Str request)
 
 		skip_whitespace(&text);
 
-		// TODO: fix - field-content not token, see RFC 2616 4.2 Message Headers
+		// FIXME: fix - field-content not token, see RFC 2616 4.2 Message Headers
 		Option_Str header_value = next_token(&text);
 
 		if (!skip_newline(&text))
 		{
-			log_msg(LOG_DEBUG, "header definition missing terminating newline");
+			log_msg(LOG_DEBUG, "header definition missing a terminating newline");
 			return ERR(MALFORMED);
 		}
 
@@ -246,12 +288,6 @@ Result_HttpRequest_HttpRequestParseError parse_request_head(Str request)
 			vector_char_extend(&value_buf, header_value.value.data, header_value.value.length);
 			hashmap_StrCI_StrBuffer_insert(&headers, header_key.value, value_buf);
 		}
-	}
-
-	if (!skip_newline(&text))
-	{
-		log_msg(LOG_DEBUG, "request missing final newline");
-		return ERR(MALFORMED);
 	}
 
 	result.headers = headers;

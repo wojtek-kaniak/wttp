@@ -41,9 +41,9 @@ void st_bsd_start_listener(BsdSocketConfig config, RequestHandler request_handle
 		return;
 	}
 
-	int fd = socket(config.domain, SOCK_STREAM, IPPROTO_TCP);
+	int socket_fd = socket(config.domain, SOCK_STREAM, IPPROTO_TCP);
 
-	if (fd == -1)
+	if (socket_fd == -1)
 	{
 		log_with_errno(LOG_FATAL, "failed to create a socket", errno);
 		return;
@@ -51,17 +51,17 @@ void st_bsd_start_listener(BsdSocketConfig config, RequestHandler request_handle
 
 	// Disable Nagle's algorithm - the entire response is sent at once
 	int tcp_nodelay = 1;
-	if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &tcp_nodelay, sizeof(int)) == -1)
+	if (setsockopt(socket_fd, IPPROTO_TCP, TCP_NODELAY, &tcp_nodelay, sizeof(int)) == -1)
 		log_with_errno(LOG_WARN, "failed to set TCP_NODELAY", errno);
 
 	// TODO: is sockaddr_storage correct?
-	if (bind(fd, (struct sockaddr*)&config.address, sizeof(config.address)) == -1)
+	if (bind(socket_fd, (struct sockaddr*)&config.address, sizeof(config.address)) == -1)
 	{
 		log_with_errno(LOG_FATAL, "failed to bind to a socket", errno);
 		return;
 	}
 
-	if (listen(fd, config.backlog) == -1)
+	if (listen(socket_fd, config.backlog) == -1)
 	{
 		log_with_errno(LOG_FATAL, "failed to listen on a socket", errno);
 		return;
@@ -71,7 +71,7 @@ void st_bsd_start_listener(BsdSocketConfig config, RequestHandler request_handle
 	{
 		struct sockaddr_storage connection_sockaddr;
 		unsigned int conn_sockaddr_len;
-		int connection_fd = accept(fd, (struct sockaddr*)&connection_sockaddr, &conn_sockaddr_len);
+		int connection_fd = accept(socket_fd, (struct sockaddr*)&connection_sockaddr, &conn_sockaddr_len);
 		if (connection_fd == -1)
 		{
 			if (errno == ECONNABORTED || errno == EINTR)
@@ -98,7 +98,7 @@ void st_bsd_start_listener(BsdSocketConfig config, RequestHandler request_handle
 
 			// TODO: support keep-alive & pipelining
 			char buffer[RECV_BUFFER_SIZE];
-			ssize_t bytes_read = recv(fd, buffer, sizeof(buffer), 0);
+			ssize_t bytes_read = recv(connection_fd, buffer, sizeof(buffer), 0);
 
 			if (bytes_read == -1)
 			{
@@ -110,6 +110,12 @@ void st_bsd_start_listener(BsdSocketConfig config, RequestHandler request_handle
 				break;
 
 			vector_char_extend(&packet, buffer, bytes_read);
+
+			if (str_find(str_from_strbuffer(packet), STR_CRLF).has_value)
+			{
+				// TODO
+				break;
+			}
 		}
 
 		RawRequest req = {
@@ -176,7 +182,8 @@ static void shutdown_and_close_conn(int connection_fd)
 /// Get a string representation of the remote address
 [[nodiscard]] static StrBuffer sockaddr_to_remote_addr(struct sockaddr_storage sockaddr)
 {
-	if (sockaddr.ss_family == AF_UNIX)
+	// FIXME
+	// if (sockaddr.ss_family == AF_UNIX)
 		return strbuffer_from_str(str_from_cstr("[unix socket]"));
 
 	union AnySockAddr any_sockaddr = { .storage = sockaddr };
@@ -198,6 +205,7 @@ static void shutdown_and_close_conn(int connection_fd)
 /// Get the remote port
 [[nodiscard]] static uint16_t sockaddr_to_remote_port(struct sockaddr_storage sockaddr)
 {
+	// TODO
 	union AnySockAddr any_sockaddr = { .storage = sockaddr };
 
 	if (sockaddr.ss_family == AF_INET)

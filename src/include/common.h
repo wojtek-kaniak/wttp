@@ -43,38 +43,15 @@
 
 #endif
 
+/// Display a panic message and abort
+[[noreturn]] void panic(const char* NONNULL message, const char* NONNULL file, size_t line);
+
+#define PANIC(message) panic(message, __FILE__, __LINE__)
+
 /// Display an allocation failure message and abort
-[[noreturn]] [[maybe_unused]] static void alloc_fail(const char* NONNULL file, size_t line)
-{
-	fprintf(stderr, "allocation failed\n");
-
-#ifdef DEBUG
-	fprintf(stderr, "\tat %s:%zu\n", file, line);
-#else
-	UNUSED(file);
-	UNUSED(line);
-#endif
-
-#if defined (DEBUG) && defined (__unix__)
-	// force a core dump
-	raise(SIGABRT);
-#endif
-	exit(1);
-}
+[[noreturn]] void alloc_fail(const char* NONNULL file, size_t line);
 
 #define ALLOC_FAIL() alloc_fail(__FILE__, __LINE__)
-
-/// Display a panic message and abort
-[[noreturn]] [[maybe_unused]] static void panic(const char* NONNULL message, const char* NONNULL file, size_t line)
-{
-	fprintf(stderr, "panicked '%s'\n\tat %s:%zu\n", message, file, line);
-
-#if defined (DEBUG) && defined (__unix__)
-	// force a core dump
-	raise(SIGABRT);
-#endif
-	exit(1);
-}
 
 #if defined (DEBUG)
 #define DEBUG_ASSERT(condition) assert(condition)
@@ -96,7 +73,5 @@ void log_msg(LogLevel level, const char* NONNULL message);
 
 /// Log a message with an associated OS error number
 void log_with_errno(LogLevel level, const char* NONNULL message, int err_no);
-
-#define PANIC(message) panic(message, __FILE__, __LINE__)
 
 #endif

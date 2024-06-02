@@ -89,8 +89,7 @@ typedef struct WTTP_P_VEC_CONCAT(Vector_, TYPE) {
 	size_t new_length = self->length + count;
 	size_t current_length = self->length;
 
-	if (new_length > self->capacity)
-		WTTP_P_VEC_CONCAT3(vector_, TYPE, _set_length) (self, new_length);
+	WTTP_P_VEC_CONCAT3(vector_, TYPE, _set_length) (self, new_length);
 	
 	memcpy(self->data + current_length, elements, count * sizeof(TYPE));
 }

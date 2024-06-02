@@ -7,4 +7,4 @@ C23 required, tested on clang 18
 - `src/lib` - shared library source
 - `src/cli` - CLI
 - `src/gui` - management GUI
-- `target` - build artifacts
+- `build` - build artifacts

@@ -40,7 +40,7 @@ typedef struct Str
 #include "generic/vector.h"
 #undef TYPE
 
-/// Convert a C string to a `Str`
+/// Convert a C string to a `Str`, excluding the terminating `'\0'`
 /// SAFETY: `cstr` has to be valid for the entire lifetime of the returned `Str`
 [[maybe_unused]] static Str str_from_cstr(const char* NONNULL cstr)
 {
@@ -113,10 +113,9 @@ typedef struct Str
 		return 0;
 }
 
-/*
 /// Find a substring in `self`
 /// Returns an index of the first occurance if any
-Option_size_t str_find(Str self, Str substr)
+[[maybe_unused]] static Option_size_t str_find(Str self, Str substr)
 {
 	if (self.length < substr.length)
 		return option_size_t_none;
@@ -139,24 +138,26 @@ Option_size_t str_find(Str self, Str substr)
 
 	return option_size_t_none;
 }
-*/
 
-/// Slice `self`
+/// Slice `self` from start inclusive to end exclusive
 /// Panics if start or end is invalid
 [[maybe_unused]] static Str str_slice(Str self, size_t start, size_t end)
 {
 	if (start > end)
 		PANIC("invalid range: start > end");
 
-	if (start >= self.length)
-		PANIC("invalid range: start >= length");
+	if (start > self.length)
+		PANIC("invalid range: start > length");
 
 	if (end > self.length)
 		PANIC("invalid range: end > length");
 
+	if (start == end)
+		return (Str) { .data = nullptr, .length = 0 };
+
 	size_t new_length = end - start;
 
-	return (Str){
+	return (Str) {
 		.data = self.data + start,
 		.length = new_length,
 	};

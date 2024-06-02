@@ -32,7 +32,7 @@ static bool SHOW_ERROR_MESSAGE = false;
 			"<title>" message "</title>" \
 		"</head>" \
 		"<body>" \
-		"<h1>\"" message "\"</h1>" \
+		"<h1>" message "</h1>" \
 		"</body>" \
 	"</html>" LF
 
@@ -107,23 +107,30 @@ Response ok_response(HttpRequest request)
 		}
 
 		size_t buffer_size = file_stat.st_size;
-		char* buffer = malloc(buffer_size);
+		
+		ssize_t bytes_read = 0;
+		char* buffer = nullptr;
 
-		if (buffer == nullptr)
-			ALLOC_FAIL();
-
-		// file size can change between stat'ing and reading
-		ssize_t bytes_read = pread(fd, buffer, file_stat.st_size, 0);
-
-		if (bytes_read == -1)
+		if (buffer_size != 0)
 		{
-			free(buffer);
-			log_with_errno(LOG_WARN, "failed to read the response file", errno);
-			return not_found_response(path);
-		}
+			buffer = malloc(buffer_size);
 
-		if (bytes_read < file_stat.st_size)
-			log_msg(LOG_DEBUG, "response file size changed between stat and read calls");
+			if (buffer == nullptr)
+				ALLOC_FAIL();
+
+			// file size can change between stat'ing and reading
+			bytes_read = pread(fd, buffer, file_stat.st_size, 0);
+
+			if (bytes_read == -1)
+			{
+				free(buffer);
+				log_with_errno(LOG_WARN, "failed to read the response file", errno);
+				return not_found_response(path);
+			}
+
+			if (bytes_read < file_stat.st_size)
+				log_msg(LOG_DEBUG, "response file size changed between stat and read calls");
+		}
 
 		return (Response) {
 			.status_code = 200,
@@ -244,7 +251,7 @@ static Response internal_error_response(const char* NONNULL message)
 				"</head>"
 				"<body>"
 					"<h1>Internal Server Error</h1>"
-					"<code>\"%s\"</code>"
+					"<code>%s</code>"
 				"</body>"
 			"</html>" LF;
 
