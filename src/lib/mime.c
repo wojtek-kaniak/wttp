@@ -17,12 +17,12 @@ void mime_initialize()
 		hashmap_Str_Str_insert(&associations, str_from_cstr(ext), str_from_cstr(mime))
 
 	// text
-	// default to utf8?
-	ASSOC("txt", "text/plain");
+	ASSOC("txt", "text/plain; charset=UTF-8");
 	ASSOC("html", "text/html");
 	ASSOC("css", "text/css");
 	ASSOC("js", "text/javascript");
 	ASSOC("mjs", "text/javascript");
+	ASSOC("md", "text/markdown; charset=UTF-8; variant=CommonMark");
 
 	// image
 	ASSOC("png", "image/png");

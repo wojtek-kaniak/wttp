@@ -1,3 +1,4 @@
+#include "mime.h"
 #define _XOPEN_SOURCE 500
 
 #include <stdio.h>
@@ -53,6 +54,26 @@ Response ok_response(HttpRequest request)
 	if (request.uri.data[request.uri.length - 1] == '/')
 		strbuffer_extend(&request.uri, index_filename);
 
+	// TODO: move extension detection to after stat to properly handle symlinks
+	//   (/a -> /a.txt symlink should set Content-Type to text/plain)
+	Option_Str mime_content_type = option_Str_none;
+	{
+		Str uri_str = str_from_strbuffer(request.uri);
+		Str uri_filename = str_slice(uri_str,
+			// URIs contain a least one (leading) slash
+			option_size_t_unwrap(str_find_last(uri_str, str_from_cstr("/"))),
+			uri_str.length
+			);
+
+		Option_size_t extension_ix = str_find_last(uri_filename, str_from_cstr("."));
+
+		if (extension_ix.has_value)
+		{
+			Str extension = str_slice(uri_filename, extension_ix.value + 1, uri_filename.length);
+			mime_content_type = mime(extension);
+		}
+	}
+
 	// null terminate the URI
 	vector_char_add(&request.uri, '\0');
 
@@ -100,7 +121,7 @@ Response ok_response(HttpRequest request)
 
 			return (Response) {
 				.status_code = 200,
-				.content_type = str_from_cstr("text/html"),
+				.content_type = option_Str_unwrap_or(mime_content_type, str_from_cstr("text/html")),
 				.additional_headers = option_Hashmap_StrCI_StrBuffer_some(headers),
 				.content = strbuffer_from_raw(nullptr, 0, 0),
 			};
@@ -134,7 +155,7 @@ Response ok_response(HttpRequest request)
 
 		return (Response) {
 			.status_code = 200,
-			.content_type = str_from_cstr("text/html"),
+			.content_type = option_Str_unwrap_or(mime_content_type, str_from_cstr("text/html")),
 			.content = strbuffer_from_raw(buffer, buffer_size, bytes_read),
 			.additional_headers = option_Hashmap_StrCI_StrBuffer_none,
 		};

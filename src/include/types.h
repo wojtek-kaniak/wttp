@@ -2,6 +2,7 @@
 #define INCL_TYPES_H
 
 #include <assert.h>
+#include <stdint.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
@@ -125,7 +126,33 @@ typedef struct Str
 		bool match = true;
 		for (size_t j = 0; j < substr.length && i + j < self.length; j++)
 		{
-			if (self.data[i + j] != substr.data[i + j])
+			if (self.data[i + j] != substr.data[j])
+			{
+				match = false;
+				break;
+			}
+		}
+
+		if (match)
+			return option_size_t_some(i);
+	}
+
+	return option_size_t_none;
+}
+
+/// Find a substring in `self`
+/// Returns an index of the last occurance if any
+[[maybe_unused]] static Option_size_t str_find_last(Str self, Str substr)
+{
+	if (self.length < substr.length)
+		return option_size_t_none;
+
+	for (size_t i = (self.length - substr.length); i != SIZE_MAX; i--)
+	{
+		bool match = true;
+		for (size_t j = 0; j < substr.length && i + j < self.length; j++)
+		{
+			if (self.data[i + j] != substr.data[j])
 			{
 				match = false;
 				break;

@@ -74,11 +74,64 @@ static Option_Str next_token(Str* text)
 		{
 			if (current == '\\')
 				in_quoted_pair = true;
+			else if (current == '\n')
+				break;
 
 			continue;
 		}
 
 		if (is_separator(current) || is_ctl(current))
+			break;
+	}
+
+	if (in_quote)
+		// TODO: error
+		return option_Str_none;
+
+	if (i == 0)
+		return option_Str_none;
+
+	Str result = str_slice(*text, 0, i);
+	*text = str_slice(*text, i, text->length);
+	return option_Str_some(result);
+}
+
+/// RFC 2616 section 4.2 field-content
+static Option_Str next_field_content(Str* text)
+{
+	size_t i = 0;
+	bool in_quote = false;
+
+	// backslash escapes in quotes, i.e. "lorem \" ipsum"
+	bool in_quoted_pair = false;
+
+	for (; i < text->length; i++)
+	{
+		char current = text->data[i];
+
+		// skip the next char after a backslash
+		if (in_quoted_pair)
+		{
+			in_quoted_pair = false;
+			continue;
+		}
+
+		if (current == '"')
+		{
+			in_quote = !in_quote;
+			continue;
+		}
+		else if (in_quote)
+		{
+			if (current == '\\')
+				in_quoted_pair = true;
+			else if (current == '\n')
+				break;
+
+			continue;
+		}
+
+		if (is_ctl(current))
 			break;
 	}
 
@@ -267,7 +320,7 @@ Result_HttpRequest_HttpRequestParseError parse_request_head(Str request)
 		skip_whitespace(&text);
 
 		// FIXME: fix - field-content not token, see RFC 2616 4.2 Message Headers
-		Option_Str header_value = next_token(&text);
+		Option_Str header_value = next_field_content(&text);
 
 		if (!skip_newline(&text))
 		{

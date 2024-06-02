@@ -30,6 +30,13 @@ typedef struct WTTP_P_OPT_CONCAT(Option_, TYPE)
 		PANIC("called option_" WTTP_P_OPT_STRINGIFY(TYPE) "_unwrap on none");
 }
 
+// option_unwrap_or
+[[maybe_unused]] static TYPE WTTP_P_OPT_CONCAT3(option_, TYPE, _unwrap_or)
+	(WTTP_P_OPT_CONCAT(Option_, TYPE) self, TYPE default_value)
+{
+	return self.has_value ? self.value : default_value;
+}
+
 [[maybe_unused]] static const WTTP_P_OPT_CONCAT(Option_, TYPE) WTTP_P_OPT_CONCAT3(option_, TYPE, _none)
 = (WTTP_P_OPT_CONCAT(Option_, TYPE)) {
 	.has_value = false,
