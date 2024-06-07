@@ -2,6 +2,7 @@
 // TODO: multithreading with https://lwn.net/Articles/542629/
 
 // #define _POSIX_C_SOURCE 200112L
+#include <stdatomic.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
@@ -33,7 +34,7 @@ typedef struct RequestMetadata
 	StrBuffer address_buf;
 } RequestMetadata;
 
-void st_bsd_start_listener(BsdSocketConfig config, RequestHandler request_handler)
+void st_bsd_start_listener(BsdSocketConfig config, RequestHandler request_handler, volatile atomic_flag* continue_flag)
 {
 	if (config.domain != AF_INET && config.domain != AF_INET6 && config.domain != AF_UNIX)
 	{
@@ -67,7 +68,9 @@ void st_bsd_start_listener(BsdSocketConfig config, RequestHandler request_handle
 		return;
 	}
 
-	while (true)
+	log_msg(LOG_INFO, "listening on the socket");
+
+	while (atomic_flag_test_and_set(continue_flag))
 	{
 		struct sockaddr_storage connection_sockaddr;
 		unsigned int conn_sockaddr_len;

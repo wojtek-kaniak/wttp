@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdatomic.h>
 #include <assert.h>
 #include <errno.h>
 
@@ -15,7 +16,6 @@
 #include "initialize.h"
 #include "listeners.h"
 #include "server.h"
-
 #include "fs.h"
 
 static const char* NULLABLE shift_args(int* NONNULL argc, char*** NONNULL argv)
@@ -133,5 +133,7 @@ int main(int argc, char** argv)
 	socket_config.address = sockaddr.storage;
 
 	RequestHandler req_handler = FILE_REQUEST_HANDLER;
-	st_bsd_start_listener(socket_config, req_handler);
+	volatile atomic_flag continue_flag = ATOMIC_FLAG_INIT;
+	atomic_flag_test_and_set(&continue_flag);
+	st_bsd_start_listener(socket_config, req_handler, &continue_flag);
 }
